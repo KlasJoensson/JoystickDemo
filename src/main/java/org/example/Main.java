@@ -46,13 +46,15 @@ public class Main {
         String address = System.getenv().getOrDefault("BLE_DEVICE_ADDRESS", "EA:87:17:89:58:94");
         String pythonExecutable = System.getProperty("os.name").toLowerCase().contains("win") ? "python" : "python3";
         BleBridge bridge = new BleBridge(pythonExecutable, "scripts/ble_bridge.py");
-
+        GUI myGUI = new GUI();
+        myGUI.createWindow();
         IO.println("Connecting to BLE device " + address + " ...");
         bridge.listen(address, line -> {
             if (line.startsWith("NOTIFY ")) {
                 String[] parts = line.split(" ", 3);
                 int res = convertToInteger(parts[2]);
                 IO.println("Message from " + parts[1] + ": " + parts[2] +" -> " + res);
+                myGUI.updateLabel(res);
                 interpretResponse(res);
             } else {
                 IO.println("[ble] " + line);
