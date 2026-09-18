@@ -1,4 +1,4 @@
-package org.example;
+package com.knightecgroup;
 
 public class Main {
 
@@ -54,7 +54,7 @@ public class Main {
                 String[] parts = line.split(" ", 3);
                 int res = convertToInteger(parts[2]);
                 IO.println("Message from " + parts[1] + ": " + parts[2] +" -> " + res);
-                myGUI.updateLabel(res);
+                myGUI.moveSpaceShip(res);
                 interpretResponse(res);
             } else {
                 IO.println("[ble] " + line);
