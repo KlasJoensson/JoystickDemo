@@ -14,17 +14,18 @@ public class Board extends JPanel implements ActionListener {
     private Timer timer;
     private SpaceShip spaceShip;
     private final int DELAY = 10;
+    private final int WIDTH = 1000;
+    private final int HEIGHT = 750;
 
     public Board() {
         initBoard();
     }
 
     private void initBoard() {
-
         setBackground(Color.black);
         setFocusable(true);
-        setSize(1000, 750);
-        spaceShip = new SpaceShip();
+        setSize(WIDTH, HEIGHT);
+        spaceShip = new SpaceShip(WIDTH, HEIGHT);
 
         timer = new Timer(DELAY, this);
         timer.start();
