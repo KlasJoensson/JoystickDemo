@@ -15,17 +15,23 @@ public class GUI {
         BoxLayout boxLayout = new BoxLayout(mainFrame.getContentPane(), BoxLayout.Y_AXIS);
         mainFrame.setLayout(boxLayout);
         headerLabel = new JLabel("Connecting...",JLabel.CENTER );
-        gameBoard = new Board();
 
         mainFrame.add(headerLabel);
-        mainFrame.add(gameBoard);
+
         mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        mainFrame.setVisible(true);
+    }
+
+    private void startGame() {
+        gameBoard = new Board();
+        mainFrame.add(gameBoard);
         mainFrame.setVisible(true);
     }
 
     public void moveSpaceShip(int mode) {
         if (mode == 42) {
             headerLabel.setText("Ready!");
+            startGame();
         } else {
             gameBoard.moveSpaceShip(mode);
         }

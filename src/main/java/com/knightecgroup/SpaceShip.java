@@ -5,21 +5,21 @@ import javax.swing.ImageIcon;
 
 public class SpaceShip {
 
-    private int x = 500;
+    private int x;
     private int y;
     private int w;
     private int h;
-    private int MAX_WIDTH;
-    private int MIN_HEIGHT;
+    private int maxWidth;
+    private int maxHeight;
     private final int STEP_LENGTH = 5;
     private Image image;
 
     public SpaceShip(int boardWidth, int boardHeight) {
         loadImage();
-        MAX_WIDTH = boardWidth-this.getWidth();
-        MIN_HEIGHT = boardHeight-this.getHeight();
-        y=MIN_HEIGHT;
-        x= (int) boardWidth/2;
+        maxWidth = boardWidth-this.getWidth();
+        maxHeight = boardHeight-this.getHeight();
+        y=maxHeight;
+        x=boardWidth/2;
     }
 
     private void loadImage() {
@@ -35,26 +35,28 @@ public class SpaceShip {
         if (y>STEP_LENGTH) {
             y -= STEP_LENGTH;
         }
+        IO.println("moveUp");
     }
 
     public void moveDown() {
-        if (y<MIN_HEIGHT) {
+        if (y<maxHeight) {
             y += STEP_LENGTH;
         }
+        IO.println("moveDown");
     }
 
     public void moveRight() {
-        if (x<(MAX_WIDTH-STEP_LENGTH)) {
+        if (x<(maxWidth-STEP_LENGTH)) {
             x += STEP_LENGTH;
         }
-
+        IO.println("moveRight");
     }
 
     public void moveLeft() {
         if (x>STEP_LENGTH) {
             x -= STEP_LENGTH;
         }
-
+        IO.println("moveLeft");
     }
 
     public int getX() {
