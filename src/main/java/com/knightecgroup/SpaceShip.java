@@ -35,28 +35,24 @@ public class SpaceShip {
         if (y>STEP_LENGTH) {
             y -= STEP_LENGTH;
         }
-        IO.println("moveUp");
     }
 
     public void moveDown() {
         if (y<maxHeight) {
             y += STEP_LENGTH;
         }
-        IO.println("moveDown");
     }
 
     public void moveRight() {
         if (x<(maxWidth-STEP_LENGTH)) {
             x += STEP_LENGTH;
         }
-        IO.println("moveRight");
     }
 
     public void moveLeft() {
         if (x>STEP_LENGTH) {
             x -= STEP_LENGTH;
         }
-        IO.println("moveLeft");
     }
 
     public int getX() {

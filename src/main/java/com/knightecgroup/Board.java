@@ -14,29 +14,44 @@ public class Board extends JPanel implements ActionListener {
     private final int DELAY = 10;
     private final int WIDTH = 1000;
     private final int HEIGHT = 750;
-    private int barSpeed = 10;
-    private int barTick = 0;
+    private int barSpeed;
     private Graphics2D g2d;
+    private int score = 0;
+    private int barTick;
+    private boolean onGame;
+    private GUI myGUI;
 
-    public Board() {
-        initBoard();
-    }
-
-    private void initBoard() {
+    public Board(GUI gui) {
         setBackground(Color.black);
         setFocusable(true);
         setSize(WIDTH, HEIGHT);
+        myGUI = gui;
+
+        initBoard();
+    }
+
+    public void initBoard() {
         spaceShip = new SpaceShip(WIDTH, HEIGHT);
         bar = new Bar(WIDTH, HEIGHT);
+        if (timer != null) {
+            timer.stop();
+        }
         timer = new Timer(DELAY, this);
+        onGame = true;
+        score = 0;
+        barSpeed = 10;
+        barTick = 0;
         timer.start();
+        IO.println("Starting the game. Score = " + score + " Speed = " + barSpeed+" Tick = "+barTick);
     }
 
     @Override
     public void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        doDrawing(g);
+        if (onGame) {
+            doDrawing(g);
+        }
 
         Toolkit.getDefaultToolkit().sync();
     }
@@ -45,8 +60,7 @@ public class Board extends JPanel implements ActionListener {
 
         g2d = (Graphics2D) g;
 
-        g2d.drawImage(spaceShip.getImage(), spaceShip.getX(),
-                spaceShip.getY(), this);
+        g2d.drawImage(spaceShip.getImage(), spaceShip.getX(), spaceShip.getY(), this);
 
         drawBar();
     }
@@ -63,17 +77,21 @@ public class Board extends JPanel implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        step();
-        if (bar != null) {
+        if (onGame) {
+            step();
             if (barTick % barSpeed == 0) {
                 moveBar();
             }
             barTick++;
+
+            if (barTick>1000 && bar.getY()<50) {
+                IO.println("Bartick running... "+barTick+" Bar at: "+bar.getY());
+            }
         }
     }
 
     private void step() {
-        repaint(0, bar.getY() - bar.getHeight(), WIDTH, bar.getHeight() * 2);
+        myGUI.updateGUI(onGame);
         repaint(spaceShip.getX()-30, spaceShip.getY()-30,
                 spaceShip.getWidth()+50, spaceShip.getHeight()+50);
 
@@ -81,14 +99,28 @@ public class Board extends JPanel implements ActionListener {
 
     private void moveBar() {
         bar.move();
+        repaint(0, bar.getY() - bar.getHeight(), WIDTH, bar.getHeight() * 2);
         if (collisionWithBar()) {
-            IO.println("CRACH!");
-            bar = new Bar(WIDTH, HEIGHT);
+            IO.println("CRACH! Score = " + score + " Speed = " + barSpeed+" Tick = "+barTick);
+            onGame = false;
+            barTick = 0;
+            bar = null;
+            myGUI.updateGUI(onGame);
         } else if (bar.hasPastedBoard()) {
-            IO.println("Clear for next bar");
+            score += 10;
+            if ((score/10)%3 == 0 && barSpeed>5) {
+                barSpeed--;
+                IO.println("Updating bar speed: "+barSpeed);
+            }
+            IO.println("Clear for next bar. Score = " + score + " Speed = " + barSpeed+" Tick = "+barTick);
             bar = new Bar(WIDTH, HEIGHT);
+            barTick = 0;
             drawBar();
         }
+    }
+
+    public int getScore() {
+        return score;
     }
 
     private boolean collisionWithBar() {
@@ -98,7 +130,7 @@ public class Board extends JPanel implements ActionListener {
         return false;
     }
 
-    public void moveSpaceShip(int input) {
+    public boolean moveSpaceShip(int input) {
         switch (input) {
             case 1:
                 spaceShip.moveUp();
@@ -113,11 +145,15 @@ public class Board extends JPanel implements ActionListener {
                 spaceShip.moveRight();
                 break;
             case 16:
-                // Fire! (not implemented yet)
+                if (!onGame) {
+                    IO.println("Starting next game. Score = " + score + " Speed = " + barSpeed+" Tick = "+barTick);
+                    initBoard();
+                }
                 break;
             default:
                 // Do nothing...
                 break;
         }
+        return onGame;
     }
 }

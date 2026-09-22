@@ -2,6 +2,7 @@ package com.knightecgroup;
 
 public class Main {
 
+    private final static String DEFAULT_MAC_ADDRESS = "EA:87:17:89:58:94";
 
     // We know the input is a 32 bit integer encode as a 8 char string, with the bytes in reverse order
     private static int convertToInteger(String str) {
@@ -43,7 +44,7 @@ public class Main {
     }
 
     static void main() throws Exception {
-        String address = System.getenv().getOrDefault("BLE_DEVICE_ADDRESS", "EA:87:17:89:58:94");
+        String address = System.getenv().getOrDefault("BLE_DEVICE_ADDRESS", DEFAULT_MAC_ADDRESS);
         String pythonExecutable = System.getProperty("os.name").toLowerCase().contains("win") ? "python" : "python3";
         BleBridge bridge = new BleBridge(pythonExecutable, "scripts/ble_bridge.py");
         GUI myGUI = new GUI();
@@ -53,9 +54,12 @@ public class Main {
             if (line.startsWith("NOTIFY ")) {
                 String[] parts = line.split(" ", 3);
                 int res = convertToInteger(parts[2]);
-                IO.println("Message from " + parts[1] + ": " + parts[2] +" -> " + res);
-                myGUI.moveSpaceShip(res);
+                //IO.println("Message from " + parts[1] + ": " + parts[2] +" -> " + res);
+                myGUI.controlGame(res);
                 interpretResponse(res);
+            } else if (line.startsWith("DISCONNECTED")) {
+                myGUI.disconnected();
+                IO.println("[ble] " + line);
             } else {
                 IO.println("[ble] " + line);
             }
