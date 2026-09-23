@@ -15,7 +15,6 @@ public class Bar {
     private final int STEP_LENGTH = 5;
     private boolean hasPasted;
     private Image barImage;
-    private Image holeImage;
 
     public Bar(int boardWidth, int boardHeight) {
         loadImages();
@@ -29,8 +28,6 @@ public class Bar {
     private void loadImages() {
         ImageIcon ii = new ImageIcon("src/main/resources/bar.png");
         barImage = ii.getImage();
-        ii = new ImageIcon("src/main/resources/hole.png");
-        holeImage  = ii.getImage();
 
         barWidth = barImage.getWidth(null);
         barHeight = barImage.getHeight(null);
@@ -76,7 +73,7 @@ public class Bar {
     public Image getBarPart(int part) throws IllegalArgumentException {
         if (part <= numberOfBarParts) {
             if(part==holePosition || part==(holePosition+1)) {
-                return null; //holeImage;
+                return null;
             } else {
                 return barImage;
             }
