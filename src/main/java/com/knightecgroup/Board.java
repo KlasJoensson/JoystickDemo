@@ -34,14 +34,15 @@ public class Board extends JPanel implements ActionListener {
         spaceShip = new SpaceShip(WIDTH, HEIGHT);
         bar = new Bar(WIDTH, HEIGHT);
         if (timer != null) {
-            timer.stop();
+            timer.restart();
+        } else {
+            timer = new Timer(DELAY, this);
+            timer.start();
         }
-        timer = new Timer(DELAY, this);
         onGame = true;
         score = 0;
         barSpeed = 10;
         barTick = 0;
-        timer.start();
         IO.println("Starting the game. Score = " + score + " Speed = " + barSpeed+" Tick = "+barTick);
     }
 
@@ -103,6 +104,7 @@ public class Board extends JPanel implements ActionListener {
         if (collisionWithBar()) {
             IO.println("CRACH! Score = " + score + " Speed = " + barSpeed+" Tick = "+barTick);
             onGame = false;
+            timer.stop();
             barTick = 0;
             bar = null;
             myGUI.updateGUI(onGame);
