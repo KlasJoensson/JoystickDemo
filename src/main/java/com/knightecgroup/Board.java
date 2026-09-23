@@ -11,6 +11,7 @@ public class Board extends JPanel implements ActionListener {
     private Timer timer;
     private SpaceShip spaceShip;
     private Bar bar;
+    private Monster monster;
     private final int DELAY = 10;
     private final int WIDTH = 1000;
     private final int HEIGHT = 750;
@@ -19,6 +20,7 @@ public class Board extends JPanel implements ActionListener {
     private int score = 0;
     private int barTick;
     private boolean onGame;
+    private boolean monstersOn;
     private GUI myGUI;
 
     public Board(GUI gui) {
@@ -40,6 +42,7 @@ public class Board extends JPanel implements ActionListener {
             timer.start();
         }
         onGame = true;
+        monstersOn = false;
         score = 0;
         barSpeed = 10;
         barTick = 0;
@@ -64,6 +67,10 @@ public class Board extends JPanel implements ActionListener {
         g2d.drawImage(spaceShip.getImage(), spaceShip.getX(), spaceShip.getY(), this);
 
         drawBar();
+
+        if (monstersOn) {
+           drawMonster();
+        }
     }
 
     private void drawBar() {
@@ -76,12 +83,21 @@ public class Board extends JPanel implements ActionListener {
         }
     }
 
+    private void drawMonster() {
+        if (monster != null) {
+            g2d.drawImage(monster.getImage(), monster.getX(), monster.getY(), this);
+        }
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
         if (onGame) {
             step();
             if (barTick % barSpeed == 0) {
                 moveBar();
+                if (monstersOn) {
+                    moveMonster();
+                }
             }
             barTick++;
 
@@ -102,22 +118,46 @@ public class Board extends JPanel implements ActionListener {
         bar.move();
         repaint(0, bar.getY() - bar.getHeight(), WIDTH, bar.getHeight() * 2);
         if (collisionWithBar()) {
-            IO.println("CRACH! Score = " + score + " Speed = " + barSpeed+" Tick = "+barTick);
-            onGame = false;
-            timer.stop();
-            barTick = 0;
-            bar = null;
-            myGUI.updateGUI(onGame);
+            collision();
+        } else if(monstersOn && collisionWithMonsters()) {
+            collision();
         } else if (bar.hasPastedBoard()) {
             score += 10;
             if ((score/10)%3 == 0 && barSpeed>5) {
                 barSpeed--;
                 IO.println("Updating bar speed: "+barSpeed);
             }
+            // Let's add a monster if the player past the first bar...
+            if (score == 10) {
+                monstersOn = true;
+            }
             IO.println("Clear for next bar. Score = " + score + " Speed = " + barSpeed+" Tick = "+barTick);
             bar = new Bar(WIDTH, HEIGHT);
+            if (monstersOn) {
+                monster = new Monster(WIDTH, HEIGHT);
+            }
             barTick = 0;
             drawBar();
+        }
+    }
+
+    private void collision() {
+        IO.println("CRACH! Spaceship at ["+spaceShip.getX()+","+spaceShip.getY()+"] Monster at["+monster.getX()+","+monster.getY()+"]");
+        onGame = false;
+        timer.stop();
+        barTick = 0;
+        bar = null;
+        myGUI.updateGUI(onGame);
+    }
+
+    private void moveMonster() {
+        if (monster != null) {
+            monster.move();
+            repaint(monster.getX(), monster.getY()-20, monster.getWidth(), monster.getHeight());
+
+            if (bar != null && bar.hasPastedBoard()) {
+                monster = new Monster(WIDTH, HEIGHT);
+            }
         }
     }
 
@@ -132,7 +172,18 @@ public class Board extends JPanel implements ActionListener {
         return false;
     }
 
-    public boolean moveSpaceShip(int input) {
+    private boolean collisionWithMonsters() {
+        if (monster == null) {
+            return false;
+        }
+        Rectangle shipBounds = new Rectangle(spaceShip.getX(), spaceShip.getY(),
+                spaceShip.getWidth(), spaceShip.getHeight());
+        Rectangle monsterBounds = new Rectangle(monster.getX(), monster.getY(),
+                monster.getWidth(), monster.getHeight());
+        return shipBounds.intersects(monsterBounds);
+    }
+
+    public void moveSpaceShip(int input) {
         switch (input) {
             case 1:
                 spaceShip.moveUp();
@@ -156,6 +207,6 @@ public class Board extends JPanel implements ActionListener {
                 // Do nothing...
                 break;
         }
-        return onGame;
+
     }
 }

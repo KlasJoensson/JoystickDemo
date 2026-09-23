@@ -56,7 +56,7 @@ public class Main {
                 int res = convertToInteger(parts[2]);
                 //IO.println("Message from " + parts[1] + ": " + parts[2] +" -> " + res);
                 myGUI.controlGame(res);
-                interpretResponse(res);
+                //interpretResponse(res);
             } else if (line.startsWith("DISCONNECTED")) {
                 myGUI.disconnected();
                 IO.println("[ble] " + line);
