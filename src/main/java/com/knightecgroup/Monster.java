@@ -11,6 +11,7 @@ public class Monster {
     private int monsterWidth;
     private int monsterHeight;
     private int boardHeight;
+    private int maxNumberOfMonstersOnRow;
     private final int STEP_LENGTH = 5;
     private boolean hasPasted;
     private Image monsterImage;
@@ -19,7 +20,7 @@ public class Monster {
         loadImage();
         Random rand = new Random();
         y = rand.nextInt(150)+50;
-        int maxNumberOfMonstersOnRow = boardWidth/50;
+        maxNumberOfMonstersOnRow = boardWidth/50;
         x = rand.nextInt(maxNumberOfMonstersOnRow)*monsterWidth;
         hasPasted = false;
         this.boardHeight = boardHeight;
@@ -54,6 +55,10 @@ public class Monster {
         } else {
             hasPasted = true;
         }
+    }
+
+    public int getMaxNumberOfMonsters() {
+        return maxNumberOfMonstersOnRow;
     }
 
     public boolean hasPastedBoard() {

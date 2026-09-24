@@ -50,7 +50,7 @@ public class Board extends JPanel implements ActionListener {
         barSpeed = 10;
         barTick = 0;
         monsters = new ArrayList<>();
-        numberOfMonsters = 3;
+        numberOfMonsters = 2;
         IO.println("Starting the game. Score = " + score + " Speed = " + barSpeed+" Tick = "+barTick);
     }
 
@@ -137,6 +137,12 @@ public class Board extends JPanel implements ActionListener {
             // Let's add a monster if the player past the first bar...
             if (score == 10) {
                 monstersOn = true;
+            }
+            if (monstersOn) {
+                if ((score / 10) % 2 == 0 && numberOfMonsters <= monsters.getFirst().getMaxNumberOfMonsters()/2) {
+                    numberOfMonsters++;
+                    IO.println("Adding a on more monster: "+  numberOfMonsters+"/"+monsters.getFirst().getMaxNumberOfMonsters()/2);
+                }
             }
             IO.println("Clear for next bar. Score = " + score + " Speed = " + barSpeed+" Tick = "+barTick);
             bar = new Bar(WIDTH, HEIGHT);
