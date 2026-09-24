@@ -18,14 +18,29 @@ public class Monster {
     public Monster(int boardWidth, int boardHeight) {
         loadImage();
         Random rand = new Random();
-        y = 100;
-        x = rand.nextInt(boardWidth-monsterWidth)+monsterWidth;
+        y = rand.nextInt(150)+50;
+        int maxNumberOfMonstersOnRow = boardWidth/50;
+        x = rand.nextInt(maxNumberOfMonstersOnRow)*monsterWidth;
         hasPasted = false;
         this.boardHeight = boardHeight;
     }
 
     private void loadImage() {
-        ImageIcon ii = new ImageIcon("src/main/resources/monster0.png");
+        ImageIcon ii;
+        Random rand = new Random();
+        int type = rand.nextInt(8);
+        ii = switch (type) {
+            case 0 -> new ImageIcon("src/main/resources/monster0.png");
+            case 1 -> new ImageIcon("src/main/resources/monster1.png");
+            case 2 -> new ImageIcon("src/main/resources/monster2.png");
+            case 3 -> new ImageIcon("src/main/resources/monster3.png");
+            case 4 -> new ImageIcon("src/main/resources/monster4.png");
+            case 5 -> new ImageIcon("src/main/resources/monster5.png");
+            case 6 -> new ImageIcon("src/main/resources/monster6.png");
+            case 7 -> new ImageIcon("src/main/resources/monster7.png");
+            default -> new ImageIcon("src/main/resources/bar.png");
+        };
+
         monsterImage = ii.getImage();
 
         monsterWidth = monsterImage.getWidth(null);
