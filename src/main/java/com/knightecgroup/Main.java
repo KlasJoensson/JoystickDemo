@@ -2,7 +2,7 @@ package com.knightecgroup;
 
 public class Main {
 
-    private final static String DEFAULT_MAC_ADDRESS = "EA:87:17:89:58:94";
+    private final static double SCAN_TIMEOUT_SECONDS = 5.0;
 
     // We know the input is a 32 bit integer encode as a 8 char string, with the bytes in reverse order
     private static int convertToInteger(String str) {
@@ -44,9 +44,14 @@ public class Main {
     }
 
     static void main() throws Exception {
-        String address = System.getenv().getOrDefault("BLE_DEVICE_ADDRESS", DEFAULT_MAC_ADDRESS);
         String pythonExecutable = System.getProperty("os.name").toLowerCase().contains("win") ? "python" : "python3";
         BleBridge bridge = new BleBridge(pythonExecutable, "scripts/ble_bridge.py");
+
+        String address = System.getenv("BLE_DEVICE_ADDRESS");
+        if (address == null || address.isBlank()) {
+            address = pickDeviceViaGui(bridge);
+        }
+
         GUI myGUI = new GUI();
         myGUI.createWindow();
         IO.println("Connecting to BLE device " + address + " ...");
@@ -64,5 +69,14 @@ public class Main {
                 IO.println("[ble] " + line);
             }
         });
+    }
+
+    private static String pickDeviceViaGui(BleBridge bridge) {
+        DevicePickerDialog dialog = new DevicePickerDialog(null, bridge, SCAN_TIMEOUT_SECONDS);
+        String address = dialog.pickDevice();
+        if (address == null) {
+            System.exit(0);
+        }
+        return address;
     }
 }

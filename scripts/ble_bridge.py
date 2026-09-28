@@ -1,11 +1,20 @@
 import asyncio
 import sys
 
-from bleak import BleakClient
+from bleak import BleakClient, BleakScanner
+
+DEFAULT_SCAN_TIMEOUT_SECONDS = 5.0
 
 
 def log(*args):
     print(*args, flush=True)
+
+
+async def scan(timeout: float):
+    devices = await BleakScanner.discover(timeout=timeout)
+    for d in devices:
+        log(f"DEVICE {d.address} {d.name or 'Unknown'}")
+    log("SCAN_DONE")
 
 
 def make_notify_handler(uuid):
@@ -64,8 +73,18 @@ async def run(address: str):
 
 def main():
     if len(sys.argv) < 2:
-        print("Usage: ble_bridge.py <device-address>", file=sys.stderr, flush=True)
+        print("Usage: ble_bridge.py <device-address> | ble_bridge.py scan [timeout-seconds]",
+              file=sys.stderr, flush=True)
         sys.exit(1)
+
+    if sys.argv[1] == "scan":
+        timeout = float(sys.argv[2]) if len(sys.argv) > 2 else DEFAULT_SCAN_TIMEOUT_SECONDS
+        try:
+            asyncio.run(scan(timeout))
+        except Exception as e:
+            print(f"ERROR {e}", flush=True)
+            sys.exit(1)
+        return
 
     address = sys.argv[1]
     try:
