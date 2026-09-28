@@ -1,8 +1,13 @@
 package com.knightecgroup;
 
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+
 public class Main {
 
     private final static double SCAN_TIMEOUT_SECONDS = 5.0;
+    private static boolean keyboradControll = false;
+    private static GUI myGUI = new GUI();
 
     // We know the input is a 32 bit integer encode as a 8 char string, with the bytes in reverse order
     private static int convertToInteger(String str) {
@@ -50,25 +55,32 @@ public class Main {
         String address = System.getenv("BLE_DEVICE_ADDRESS");
         if (address == null || address.isBlank()) {
             address = pickDeviceViaGui(bridge);
+            if (address == "keyboard") {
+                keyboradControll = true;
+            }
         }
 
-        GUI myGUI = new GUI();
         myGUI.createWindow();
-        IO.println("Connecting to BLE device " + address + " ...");
-        bridge.listen(address, line -> {
-            if (line.startsWith("NOTIFY ")) {
-                String[] parts = line.split(" ", 3);
-                int res = convertToInteger(parts[2]);
-                //IO.println("Message from " + parts[1] + ": " + parts[2] +" -> " + res);
-                myGUI.controlGame(res);
-                //interpretResponse(res);
-            } else if (line.startsWith("DISCONNECTED")) {
-                myGUI.disconnected();
-                IO.println("[ble] " + line);
-            } else {
-                IO.println("[ble] " + line);
-            }
-        });
+        if (keyboradControll) {
+            IO.println("Using keyboard instead...");
+            myGUI.controlGame(21);
+        } else {
+            IO.println("Connecting to BLE device " + address + " ...");
+            bridge.listen(address, line -> {
+                if (line.startsWith("NOTIFY ")) {
+                    String[] parts = line.split(" ", 3);
+                    int res = convertToInteger(parts[2]);
+                    //IO.println("Message from " + parts[1] + ": " + parts[2] +" -> " + res);
+                    myGUI.controlGame(res);
+                    //interpretResponse(res);
+                } else if (line.startsWith("DISCONNECTED")) {
+                    myGUI.disconnected();
+                    IO.println("[ble] " + line);
+                } else {
+                    IO.println("[ble] " + line);
+                }
+            });
+        }
     }
 
     private static String pickDeviceViaGui(BleBridge bridge) {
@@ -79,4 +91,5 @@ public class Main {
         }
         return address;
     }
+
 }

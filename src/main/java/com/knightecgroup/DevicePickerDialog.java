@@ -32,6 +32,7 @@ public class DevicePickerDialog extends JDialog {
     private final JLabel statusLabel = new JLabel("Scanning for BLE devices...", JLabel.CENTER);
     private final JButton connectButton = new JButton("Connect");
     private final JButton rescanButton = new JButton("Rescan");
+    private final JButton keyboardButton = new JButton("Use keyboard");
     private String selectedAddress;
 
     public DevicePickerDialog(Frame owner, BleBridge bridge, double scanTimeoutSeconds) {
@@ -95,9 +96,16 @@ public class DevicePickerDialog extends JDialog {
         connectButton.setEnabled(false);
         connectButton.addActionListener(e -> confirmSelection());
         rescanButton.addActionListener(e -> startScan());
+        keyboardButton.addActionListener(e -> useKeyboard());
         buttonPanel.add(rescanButton);
         buttonPanel.add(connectButton);
+        buttonPanel.add(keyboardButton);
         return buttonPanel;
+    }
+
+    private void useKeyboard() {
+        selectedAddress = "keyboard";
+        dispose();
     }
 
     private void confirmSelection() {

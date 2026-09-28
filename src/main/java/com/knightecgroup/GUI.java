@@ -1,13 +1,16 @@
 package com.knightecgroup;
 
 import javax.swing.*;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 
-public class GUI {
+public class GUI implements KeyListener {
     private JFrame mainFrame;
     private JLabel headerLabel;
     private JLabel scoreLabel;
     private Board gameBoard;
     private boolean gameOn = false;
+    private boolean keyboardControl = false;
 
     public void createWindow() {
         mainFrame = new JFrame("Joystick demo");
@@ -61,6 +64,12 @@ public class GUI {
                 headerLabel.setText("Ready! Press fire to start...");
                 scoreLabel.setText("Score: 0");
             }
+            if (mode == 21) {
+                headerLabel.setText("Ready! Press space to start...");
+                scoreLabel.setText("Score: 0");
+                mainFrame.addKeyListener(this);
+                keyboardControl = true;
+            }
             if (mode == 16) {
                 headerLabel.setText("");
                 scoreLabel.setText("Score: 0");
@@ -70,7 +79,46 @@ public class GUI {
         }
 
     }
+    @Override
+    public void keyTyped(KeyEvent e) {
 
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+        if (keyboardControl) {
+            char key = e.getKeyChar();
+            switch (key) {
+                case 'a':
+                case 'A':
+                    controlGame(4);
+                    break;
+                case 'l':
+                case 'L':
+                    controlGame(8);
+                    break;
+                case 't':
+                case 'T':
+                    controlGame(1);
+                    break;
+                case 'b':
+                case 'B':
+                    controlGame(2);
+                    break;
+                case ' ':
+                    controlGame(16);
+                    break;
+                default:
+                    break;
+
+            }
+        }
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+
+    }
 }
 
 
