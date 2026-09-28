@@ -12,6 +12,7 @@ public class Monster {
     private int monsterHeight;
     private int boardHeight;
     private int maxNumberOfMonstersOnRow;
+    private int score;
     private final int STEP_LENGTH = 5;
     private boolean hasPasted;
     private Image monsterImage;
@@ -30,6 +31,7 @@ public class Monster {
         ImageIcon ii;
         Random rand = new Random();
         int type = rand.nextInt(8);
+        score = (type+1)*3;
         ii = switch (type) {
             case 0 -> new ImageIcon("src/main/resources/monster0.png");
             case 1 -> new ImageIcon("src/main/resources/monster1.png");
@@ -81,6 +83,9 @@ public class Monster {
         return monsterHeight;
     }
 
+    public int getScore() {
+        return score;
+    }
 
     public Image getImage() throws IllegalArgumentException {
         return monsterImage;

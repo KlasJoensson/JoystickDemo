@@ -12,7 +12,7 @@ public class Board extends JPanel implements ActionListener {
     private Timer timer;
     private SpaceShip spaceShip;
     private Bar bar;
-    //private Monster monster;
+    private Missile missile;
     private final int DELAY = 10;
     private final int WIDTH = 1000;
     private final int HEIGHT = 750;
@@ -22,6 +22,7 @@ public class Board extends JPanel implements ActionListener {
     private int barTick;
     private boolean onGame;
     private boolean monstersOn;
+    private boolean missileFired;
     private ArrayList<Monster> monsters;
     private int numberOfMonsters;
     private GUI myGUI;
@@ -76,6 +77,10 @@ public class Board extends JPanel implements ActionListener {
         if (monstersOn) {
            drawMonster();
         }
+
+        if (missileFired) {
+            g2d.drawImage(missile.getImage(), missile.getX(), missile.getY(), this);
+        }
     }
 
     private void drawBar() {
@@ -118,23 +123,32 @@ public class Board extends JPanel implements ActionListener {
         myGUI.updateGUI(onGame);
         repaint(spaceShip.getX()-30, spaceShip.getY()-30,
                 spaceShip.getWidth()+50, spaceShip.getHeight()+50);
-
     }
 
     private void moveBar() {
         bar.move();
         repaint(0, bar.getY() - bar.getHeight(), WIDTH, bar.getHeight() * 2);
         if (collisionWithBar()) {
-            collision();
+            collision("the bar");
         } else if(monstersOn && collisionWithMonsters()) {
-            collision();
+            collision("a monster");
+        } else if(missileFired && missile != null) {
+            if (missile.hasPastedBoard() || missileHitsBar() || missileHitsMonster()) {
+                removeMissile();
+            } else {
+                missile.move();
+                repaint(missile.getX(), missile.getY(), missile.getWidth(), missile.getHeight());
+            }
         } else if (bar.hasPastedBoard()) {
             score += 10;
             if ((score/10)%3 == 0 && barSpeed>5) {
                 barSpeed--;
                 IO.println("Updating bar speed: "+barSpeed);
             }
-            // Let's add a monster if the player past the first bar...
+            if (missileFired) {
+                removeMissile();
+            }
+            // Let's add two monsters if the player past the first bar...
             if (score == 10) {
                 monstersOn = true;
             }
@@ -154,8 +168,8 @@ public class Board extends JPanel implements ActionListener {
         }
     }
 
-    private void collision() {
-        IO.println("CRACH!");
+    private void collision(String with) {
+        IO.println("CRACH with "+with+"!");
         onGame = false;
         timer.stop();
         barTick = 0;
@@ -168,9 +182,6 @@ public class Board extends JPanel implements ActionListener {
             monster.move();
             repaint(monster.getX(), monster.getY() - 20, monster.getWidth(), monster.getHeight());
 
-            /*if (monster.hasPastedBoard()) {
-                monsters.remove(monster);
-            }*/
             if (monsters.isEmpty()) {
                 createMonsters();
             }
@@ -197,6 +208,13 @@ public class Board extends JPanel implements ActionListener {
         return false;
     }
 
+    private boolean missileHitsBar() {
+        if (missile.getY() < bar.getY()+bar.getHeight() || missile.getY() + missile.getHeight() < bar.getY()) {
+            return missile.getX()-missile.getWidth() < bar.getHoleStart() || missile.getX() > bar.getHoleEnd();
+        }
+        return false;
+    }
+
     private boolean collisionWithMonsters() {
         boolean collision = false;
         Rectangle shipBounds = new Rectangle(spaceShip.getX(), spaceShip.getY(),
@@ -210,6 +228,30 @@ public class Board extends JPanel implements ActionListener {
             collision = shipBounds.intersects(monsterBounds);
         }
         return collision;
+    }
+
+    private boolean missileHitsMonster() {
+        Rectangle missileBounds = new Rectangle(missile.getX(), missile.getY(),
+                missile.getWidth(), missile.getHeight());
+        for (Monster monster : monsters) {
+            if (monster == null) {
+                return false;
+            }
+            Rectangle monsterBounds = new Rectangle(monster.getX(), monster.getY(),
+                    monster.getWidth(), monster.getHeight());
+            if (missileBounds.intersects(monsterBounds)) {
+                score += monster.getScore();
+                monsters.remove(monster);
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private void removeMissile() {
+        missileFired = false;
+        missile = null;
     }
 
     public void moveSpaceShip(int input) {
@@ -230,6 +272,10 @@ public class Board extends JPanel implements ActionListener {
                 if (!onGame) {
                     IO.println("Starting next game. Score = " + score + " Speed = " + barSpeed+" Tick = "+barTick);
                     initBoard();
+                } else if (!missileFired) {
+                    IO.println("Fire!");
+                    missileFired = true;
+                    missile = new Missile(spaceShip.getX()+spaceShip.getWidth()/2, spaceShip.getY());
                 }
                 break;
             default:
