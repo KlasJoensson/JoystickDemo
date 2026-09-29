@@ -9,8 +9,8 @@ public class SpaceShip {
     private int y;
     private int w;
     private int h;
-    private int maxWidth;
-    private int maxHeight;
+    private final int maxWidth;
+    private final int maxHeight;
     private final int STEP_LENGTH = 5;
     private Image image;
 

@@ -115,7 +115,7 @@ class SpaceShipTest {
             assertTrue(shipXPosition >= MIN_COORD, "Ship X position is out of bounds: "+shipXPosition+ "<" + MIN_COORD);
 
             ship.moveLeft();
-            assertTrue(shipXPosition == ship.getX(),  "Ship moved: "+shipXPosition+"!="+ship.getX());
+            assertEquals(shipXPosition, ship.getX(), "Ship moved: " + shipXPosition + "!=" + ship.getX());
         }
 
         @Test
@@ -125,7 +125,7 @@ class SpaceShipTest {
             assertTrue(shipXPosition <= MAX_X, "Ship X position is out of bounds: "+shipXPosition+ ">" + MAX_X);
 
             ship.moveRight();
-            assertTrue(shipXPosition == ship.getX(),  "Ship moved: "+shipXPosition+"!="+ship.getX());
+            assertEquals(shipXPosition, ship.getX(), "Ship moved: " + shipXPosition + "!=" + ship.getX());
         }
 
         @Test
@@ -135,7 +135,7 @@ class SpaceShipTest {
             assertTrue(MIN_COORD < shipYPosition);
 
             ship.moveUp();
-            assertTrue(shipYPosition == ship.getY(), "Ship moved: "+shipYPosition+"!="+ship.getY());
+            assertEquals(shipYPosition, ship.getY(), "Ship moved: " + shipYPosition + "!=" + ship.getY());
         }
 
         @Test

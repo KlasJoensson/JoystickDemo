@@ -64,8 +64,8 @@ public class DevicePickerDialog extends JDialog {
             public Component getListCellRendererComponent(JList<?> list, Object value, int index,
                     boolean isSelected, boolean cellHasFocus) {
                 Component c = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-                if (value instanceof BleDevice d) {
-                    setText(d.name() + "  (" + d.address() + ")");
+                if (value instanceof BleDevice(String address, String name)) {
+                    setText(name + "  (" + address + ")");
                 }
                 return c;
             }

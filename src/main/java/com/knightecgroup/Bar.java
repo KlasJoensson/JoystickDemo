@@ -9,9 +9,9 @@ public class Bar {
     private int y=0;
     private int barWidth;
     private int barHeight;
-    private int numberOfBarParts;
-    private int holePosition;
-    private int boardHeight;
+    private final int numberOfBarParts;
+    private final int holePosition;
+    private final int boardHeight;
     private final int STEP_LENGTH = 5;
     private boolean hasPasted;
     private Image barImage;

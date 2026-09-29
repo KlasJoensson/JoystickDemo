@@ -1,85 +1,88 @@
 package com.knightecgroup;
 
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
+import java.io.IOException;
+import java.util.logging.Logger;
 
 public class Main {
 
     private final static double SCAN_TIMEOUT_SECONDS = 5.0;
-    private static boolean keyboradControll = false;
-    private static GUI myGUI = new GUI();
+    private static boolean keyboardControl = false;
+    private final static GUI myGUI = new GUI();
+    private final static Logger log = Logger.getLogger(Main.class.getName());
 
-    // We know the input is a 32 bit integer encode as a 8 char string, with the bytes in reverse order
+    // We know the input is a '32-bit' integer encode as an 8 char string, with the bytes in reverse order
     private static int convertToInteger(String str) {
-        StringBuilder reversedString = new StringBuilder();
-        reversedString.append(str.substring(6,8));
-        reversedString.append(str.substring(4,6));
-        reversedString.append(str.substring(2,4));
-        reversedString.append(str.substring(0,2));
+        String reversedString = str.substring(6, 8) +
+                str.substring(4, 6) +
+                str.substring(2, 4) +
+                str.substring(0, 2);
 
-        return Integer.parseInt(reversedString.toString(), 16);
+        return Integer.parseInt(reversedString, 16);
     }
 
     private static void interpretResponse(int res) {
         switch (res) {
             case 1:
-                IO.println("Stick up!");
+                log.finest("Stick up!");
                 break;
             case 2:
-                IO.println("Stick down!");
+                log.finest("Stick down!");
                 break;
             case 4:
-                IO.println("Stick left!");
+                log.finest("Stick left!");
                 break;
             case 8:
-                IO.println("Stick Right!");
+                log.finest("Stick Right!");
                 break;
             case 16:
-                IO.println("Fire!");
+                log.finest("Fire!");
                 break;
             case 42:
-                IO.println("Got first message!");
+                log.finest("Got first message!");
                 break;
             case 2042:
-                IO.println("Button 0 on HW pressed!");
+                log.finest("Button 0 on HW pressed!");
                 break;
             default:
-                IO.println("WTF! (got: " + res + ")");
+                log.finest("WTF! (got: " + res + ")");
         }
     }
 
-    static void main() throws Exception {
+    static void main() {
         String pythonExecutable = System.getProperty("os.name").toLowerCase().contains("win") ? "python" : "python3";
         BleBridge bridge = new BleBridge(pythonExecutable, "scripts/ble_bridge.py");
 
         String address = System.getenv("BLE_DEVICE_ADDRESS");
         if (address == null || address.isBlank()) {
             address = pickDeviceViaGui(bridge);
-            if (address == "keyboard") {
-                keyboradControll = true;
+            if (address.equals("keyboard")) {
+                keyboardControl = true;
             }
         }
 
         myGUI.createWindow();
-        if (keyboradControll) {
-            IO.println("Using keyboard instead...");
+        if (keyboardControl) {
+            log.info("Uses the keyboard as input...");
             myGUI.controlGame(21);
         } else {
-            IO.println("Connecting to BLE device " + address + " ...");
-            bridge.listen(address, line -> {
-                if (line.startsWith("NOTIFY ")) {
-                    String[] parts = line.split(" ", 3);
-                    int res = convertToInteger(parts[2]);
-                    //IO.println("Message from " + parts[1] + ": " + parts[2] +" -> " + res);
-                    myGUI.controlGame(res);
-                    //interpretResponse(res);
-                } else if (line.startsWith("DISCONNECTED")) {
-                    myGUI.disconnected();
-                    IO.println("[ble] " + line);
-                } else {
-                    IO.println("[ble] " + line);
-                }
-            });
+            log.info("Connecting to BLE device " + address + " ...");
+            try {
+                bridge.listen(address, line -> {
+                    if (line.startsWith("NOTIFY ")) {
+                        String[] parts = line.split(" ", 3);
+                        int res = convertToInteger(parts[2]);
+                        myGUI.controlGame(res);
+                        interpretResponse(res);
+                    } else if (line.startsWith("DISCONNECTED")) {
+                        myGUI.disconnected();
+                        log.info("[ble] " + line);
+                    } else {
+                        log.info("[ble] " + line);
+                    }
+                });
+            } catch (IOException | InterruptedException e) {
+                log.severe("[ble] ERROR: " + e.getMessage() );
+            }
         }
     }
 

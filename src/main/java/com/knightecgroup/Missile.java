@@ -6,7 +6,7 @@ import java.awt.*;
 public class Missile {
 
         private int y;
-        private int x;
+        private final int x;
         private int missileWidth;
         private int missileHeight;
         private final int STEP_LENGTH = 15;

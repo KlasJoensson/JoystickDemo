@@ -7,8 +7,11 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.logging.Logger;
 
 public class BleBridge {
+
+    private final Logger log = Logger.getLogger(BleBridge.class.getName());
 
     private final String pythonExecutable;
     private final String scriptPath;
@@ -22,17 +25,7 @@ public class BleBridge {
         Process process = new ProcessBuilder(pythonExecutable, scriptPath, "scan",
                 String.valueOf(timeoutSeconds)).start();
 
-        Thread errorReader = new Thread(() -> {
-            try (BufferedReader err = new BufferedReader(
-                    new InputStreamReader(process.getErrorStream(), StandardCharsets.UTF_8))) {
-                String line;
-                while ((line = err.readLine()) != null) {
-                    System.err.println("[ble_bridge] " + line);
-                }
-            } catch (IOException ignored) {
-            }
-        });
-        errorReader.setDaemon(true);
+        Thread errorReader = createErrorReader(process);
         errorReader.start();
 
         List<BleDevice> devices = new ArrayList<>();
@@ -46,7 +39,7 @@ public class BleBridge {
                 } else if (line.equals("SCAN_DONE")) {
                     break;
                 } else {
-                    System.err.println("[ble_bridge] " + line);
+                    log.severe("[ble_bridge] " + line);
                 }
             }
         }
@@ -55,20 +48,26 @@ public class BleBridge {
         return devices;
     }
 
-    public void listen(String deviceAddress, Consumer<String> onLine) throws IOException, InterruptedException {
-        Process process = new ProcessBuilder(pythonExecutable, scriptPath, deviceAddress).start();
-
+    private Thread createErrorReader(Process process) {
         Thread errorReader = new Thread(() -> {
             try (BufferedReader err = new BufferedReader(
                     new InputStreamReader(process.getErrorStream(), StandardCharsets.UTF_8))) {
                 String line;
                 while ((line = err.readLine()) != null) {
-                    System.err.println("[ble_bridge] " + line);
+                    log.severe("[ble_bridge] " + line);
                 }
-            } catch (IOException ignored) {
+            } catch (IOException e) {
+                log.info("[ble_bridge] Ignores the error: " + e);
             }
         });
         errorReader.setDaemon(true);
+        return errorReader;
+    }
+
+    public void listen(String deviceAddress, Consumer<String> onLine) throws IOException, InterruptedException {
+        Process process = new ProcessBuilder(pythonExecutable, scriptPath, deviceAddress).start();
+
+        Thread errorReader = createErrorReader(process);
         errorReader.start();
 
         try (BufferedReader out = new BufferedReader(

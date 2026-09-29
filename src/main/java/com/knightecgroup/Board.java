@@ -4,10 +4,13 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
 public class Board extends JPanel implements ActionListener {
+
+    private final Logger log = Logger.getLogger(Board.class.getName());
 
     private Timer timer;
     private SpaceShip spaceShip;
@@ -25,7 +28,7 @@ public class Board extends JPanel implements ActionListener {
     private boolean missileFired;
     private ArrayList<Monster> monsters;
     private int numberOfMonsters;
-    private GUI myGUI;
+    private final GUI myGUI;
 
     public Board(GUI gui) {
         setBackground(Color.black);
@@ -52,7 +55,7 @@ public class Board extends JPanel implements ActionListener {
         barTick = 0;
         monsters = new ArrayList<>();
         numberOfMonsters = 2;
-        IO.println("Starting the game. Score = " + score + " Speed = " + barSpeed+" Tick = "+barTick);
+        log.info("Starting the game. Score = " + score + " Speed = " + barSpeed+" Tick = "+barTick);
     }
 
     @Override
@@ -114,7 +117,7 @@ public class Board extends JPanel implements ActionListener {
             barTick++;
 
             if (barTick>1000 && bar.getY()<50) {
-                IO.println("Bartick running... "+barTick+" Bar at: "+bar.getY());
+                log.info("Bar tick running... "+barTick+" Bar at: "+bar.getY());
             }
         }
     }
@@ -141,9 +144,9 @@ public class Board extends JPanel implements ActionListener {
             }
         } else if (bar.hasPastedBoard()) {
             score += 10;
-            if ((score/10)%3 == 0 && barSpeed>5) {
+            if ((score / 10) % 3 == 0 && barSpeed > 5) {
                 barSpeed--;
-                IO.println("Updating bar speed: "+barSpeed);
+                IO.println("Updating bar speed: " + barSpeed);
             }
             if (missileFired) {
                 removeMissile();
@@ -153,12 +156,12 @@ public class Board extends JPanel implements ActionListener {
                 monstersOn = true;
             }
             if (monstersOn) {
-                if ((score / 10) % 2 == 0 && numberOfMonsters <= monsters.getFirst().getMaxNumberOfMonsters()/2) {
+                if ((score / 10) % 2 == 0 && numberOfMonsters <= monsters.getFirst().getMaxNumberOfMonsters() / 2) {
                     numberOfMonsters++;
-                    IO.println("Adding a on more monster: "+  numberOfMonsters+"/"+monsters.getFirst().getMaxNumberOfMonsters()/2);
+                    log.info("Adding a on more monster: " + numberOfMonsters + "/" + monsters.getFirst().getMaxNumberOfMonsters() / 2);
                 }
             }
-            IO.println("Clear for next bar. Score = " + score + " Speed = " + barSpeed+" Tick = "+barTick);
+            log.info("Clear for next bar. Score = " + score + " Speed = " + barSpeed+" Tick = "+barTick);
             bar = new Bar(WIDTH, HEIGHT);
             if (monstersOn) {
                 createMonsters();
@@ -169,7 +172,7 @@ public class Board extends JPanel implements ActionListener {
     }
 
     private void collision(String with) {
-        IO.println("CRACH with "+with+"!");
+        log.info("Colliding with: " + with);
         onGame = false;
         timer.stop();
         barTick = 0;
@@ -270,12 +273,12 @@ public class Board extends JPanel implements ActionListener {
                 break;
             case 16:
                 if (!onGame) {
-                    IO.println("Starting next game. Score = " + score + " Speed = " + barSpeed+" Tick = "+barTick);
+                    log.info("Starting next game. Score = " + score + " Speed = " + barSpeed+" Tick = "+barTick);
                     initBoard();
                 } else if (!missileFired) {
-                    IO.println("Fire!");
+                    log.info("Missile fired!");
                     missileFired = true;
-                    missile = new Missile(spaceShip.getX()+spaceShip.getWidth()/2, spaceShip.getY());
+                    missile = new Missile(spaceShip.getX() + spaceShip.getWidth() / 2, spaceShip.getY());
                 }
                 break;
             default:

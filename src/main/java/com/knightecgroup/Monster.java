@@ -7,11 +7,11 @@ import java.util.Random;
 public class Monster {
 
     private int y;
-    private int x;
+    private final int x;
     private int monsterWidth;
     private int monsterHeight;
-    private int boardHeight;
-    private int maxNumberOfMonstersOnRow;
+    private final int boardHeight;
+    private final int maxNumberOfMonstersOnRow;
     private int score;
     private final int STEP_LENGTH = 5;
     private boolean hasPasted;
