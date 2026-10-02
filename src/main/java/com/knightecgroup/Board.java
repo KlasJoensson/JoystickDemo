@@ -123,7 +123,7 @@ public class Board extends JPanel implements ActionListener {
     }
 
     private void step() {
-        myGUI.updateGUI(onGame);
+        myGUI.updateGUI(0);
         repaint(spaceShip.getX()-30, spaceShip.getY()-30,
                 spaceShip.getWidth()+50, spaceShip.getHeight()+50);
     }
@@ -146,7 +146,7 @@ public class Board extends JPanel implements ActionListener {
             score += 10;
             if ((score / 10) % 3 == 0 && barSpeed > 5) {
                 barSpeed--;
-                IO.println("Updating bar speed: " + barSpeed);
+                log.info("Updating bar speed: " + barSpeed);
             }
             if (missileFired) {
                 removeMissile();
@@ -155,7 +155,7 @@ public class Board extends JPanel implements ActionListener {
             if (score == 10) {
                 monstersOn = true;
             }
-            if (monstersOn) {
+            if (monstersOn && !monsters.isEmpty()) {
                 if ((score / 10) % 2 == 0 && numberOfMonsters <= monsters.getFirst().getMaxNumberOfMonsters() / 2) {
                     numberOfMonsters++;
                     log.info("Adding a on more monster: " + numberOfMonsters + "/" + monsters.getFirst().getMaxNumberOfMonsters() / 2);
@@ -177,7 +177,7 @@ public class Board extends JPanel implements ActionListener {
         timer.stop();
         barTick = 0;
         bar = null;
-        myGUI.updateGUI(onGame);
+        myGUI.updateGUI(-1);
     }
 
     private void moveMonster() {
