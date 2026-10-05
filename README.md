@@ -39,4 +39,8 @@ through that bar, after a while it adds some monsters that is also to be avoided
 game ends when the spaceship hits eather the bar or one of the monsters.</br>
 The player can shoot the monsters with a missile, but only one missile can be on the 
 screen at the time. If a monster is hit the player get points (the amount differs between the monsters). 
-The missile can't damage the bar, it will just disappear when it hit the bar (and then a new be fired).
+The missile can't damage the bar, it will just disappear when it hit the bar (and then a new be fired). </br>
+Once the game has ended the player will be asked of her name if the score is higher than any on the high score list. 
+The name is written by moving the left or right along a list of letters, to get lower case (the list starts with upper 
+case letters) or numbers move the stick upwards or downwards. A letter (or number) are selected by pressing fire, and are
+then finished by selecting the option <code>End</code>.
