@@ -7,9 +7,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.*;
 import java.util.*;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 public class GUI implements KeyListener {
     private JFrame mainFrame;
@@ -32,7 +32,7 @@ public class GUI implements KeyListener {
     private ArrayList<String> lowerCase;
     private ArrayList<String> upperCase;
     private ArrayList<String> numbers;
-
+    private final String storedHighScore = "src/main/resources/highscores.txt";
 
     public void createWindow() {
         mainFrame = new JFrame("Joystick demo");
@@ -77,6 +77,15 @@ public class GUI implements KeyListener {
         }
         highScores = sortByValue(highScores);
 
+        JPanel tableWrapper = getTableWrapper();
+        board.add(tableWrapper);
+        board.add(new JLabel(" ", JLabel.CENTER));
+
+
+        return board;
+    }
+
+    private JPanel getTableWrapper() {
         JPanel tablePanel = new JPanel(new GridLayout(highScores.size(), 2));
         for (Map.Entry<String, Integer> entry : highScores.entrySet()) {
             JLabel nameLabel = new JLabel(entry.getKey(), JLabel.LEFT);
@@ -89,20 +98,31 @@ public class GUI implements KeyListener {
         }
         JPanel tableWrapper = new JPanel(new FlowLayout(FlowLayout.CENTER));
         tableWrapper.add(tablePanel);
-        board.add(tableWrapper);
-        board.add(new JLabel(" ", JLabel.CENTER));
-
-
-        return board;
+        return tableWrapper;
     }
 
     private HashMap<String, Integer> initHighScores() {
         HashMap <String, Integer> highScores = new HashMap<>();
-        highScores.put("Ice", 500);
-        highScores.put("Viper", 1000);
-        highScores.put("Maverick", 490);
-        highScores.put("Goose", 450);
-        highScores.put("Charlie", 200);
+        File file = new File(storedHighScore);
+        if (file.exists()) {
+            try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+                String line;
+                while ((line = br.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    highScores.put(parts[0], Integer.parseInt(parts[1]));
+                }
+            } catch (IOException e) {
+                System.err.println("Error reading high scores.txt file: " + e.getMessage());
+            }
+        } else {
+            try {
+                if (!file.createNewFile()) {
+                    System.err.println("Error creating high scores.txt: File already exists...");
+                }
+            } catch (IOException e) {
+                System.err.println("Error creating high scores.txt file: " + e.getMessage());
+            }
+        }
 
         upperCase = new ArrayList<>();
         for (char l = 'A'; l <= 'Z'; l++) { upperCase.add(String.valueOf(l)); }
@@ -229,11 +249,23 @@ public class GUI implements KeyListener {
         if (letters.get(namePointer).strip().equals("End")) {
             writeName = false;
             highScores.put(playerNameLabel.getText().strip(), gameBoard.getScore());
+            updateHighScoreFile();
             updateGUI(1);
         } else {
             String name = playerNameLabel.getText();
             name += letters.get(namePointer).strip();
             playerNameLabel.setText(name);
+        }
+    }
+
+    private void updateHighScoreFile() {
+        try (FileWriter newHighScores = new FileWriter(storedHighScore)) {
+            for (Map.Entry<String, Integer> entry : highScores.entrySet()) {
+                newHighScores.write(entry.getKey() + "," + entry.getValue().toString() + "\n");
+                newHighScores.flush();
+            }
+        } catch (IOException e) {
+            System.err.println("Can't write to file: " + e.getMessage());
         }
     }
 

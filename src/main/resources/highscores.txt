@@ -1,0 +1,5 @@
+Viper,1000
+Ice,500
+Maverick,490
+Goose,450
+Charlie,200
