@@ -1,11 +1,15 @@
 package com.knightecgroup;
 
 import javax.swing.*;
+import javax.swing.Timer;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.util.*;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class GUI implements KeyListener {
     private JFrame mainFrame;
@@ -22,6 +26,7 @@ public class GUI implements KeyListener {
     private boolean keyboardControl = false;
     private boolean writeName = false;
     private int namePointer;
+    private Timer timer;
     private HashMap<String, Integer> highScores;
     private ArrayList<String> letters;
     private ArrayList<String> lowerCase;
@@ -46,9 +51,18 @@ public class GUI implements KeyListener {
         scorePanel = createLeaderBoard();
         mainFrame.add(scorePanel);
 
+        timer = new Timer(250, stopTimer);
+
         mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         mainFrame.setVisible(true);
     }
+
+    private final ActionListener stopTimer = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            timer.stop();
+        }
+    };
 
     private JPanel createLeaderBoard() {
         JPanel board = new JPanel();
@@ -108,14 +122,14 @@ public class GUI implements KeyListener {
     }
 
     private void startGame() {
+        mainFrame.remove(scorePanel);
         if (gameBoard == null) {
-            mainFrame.remove(scorePanel);
             gameBoard = new Board(this);
-            mainFrame.add(gameBoard);
         } else {
             gameBoard.initBoard();
-            mainFrame.repaint();
         }
+        mainFrame.add(gameBoard);
+        mainFrame.repaint();
         mainFrame.setVisible(true);
     }
 
@@ -130,6 +144,7 @@ public class GUI implements KeyListener {
             scoreLabel.setText("Score: " + gameBoard.getScore());
         } else if (gameStatus == -1) {
             gameOn = false;
+            mainFrame.remove(gameBoard);
             headerLabel.setText("GAME OVER!!!");
             namePanel = createNamePanel();
             int minHighScore = highScores.values().stream().min(Comparator.naturalOrder()).orElse(0);
@@ -137,22 +152,21 @@ public class GUI implements KeyListener {
                 writeName = true;
                 highScores = sortByValue(highScores);
                 highScores.remove(highScores.entrySet().stream().toList().getLast().getKey());
-                mainFrame.remove(gameBoard);
                 mainFrame.add(namePanel);
                 mainFrame.repaint();
             } else {
-                headerLabel.setText("GAME OVER!!! Press fire to start...");
-                scorePanel = createLeaderBoard();
-                mainFrame.remove(namePanel);
-                mainFrame.add(scorePanel);
+                if (!writeName) {
+                    headerLabel.setText("GAME OVER!!! Press fire to start...");
+                    scorePanel = createLeaderBoard();
+                    mainFrame.remove(namePanel);
+                    mainFrame.add(scorePanel);
+                }
             }
         } else if (gameStatus == 1) {
             headerLabel.setText("GAME OVER!!! Press fire to start...");
-            if (!Arrays.stream(mainFrame.getComponents()).iterator().equals(scorePanel) ) {
-                scorePanel = createLeaderBoard();
-                mainFrame.remove(namePanel);
-                mainFrame.add(scorePanel);
-            }
+            scorePanel = createLeaderBoard();
+            mainFrame.remove(namePanel);
+            mainFrame.add(scorePanel);
         }
     }
 
@@ -197,7 +211,7 @@ public class GUI implements KeyListener {
         }
 
         if (namePointer-1 < 0) {
-            preLetter.setText(letters.get(letters.size()-1));
+            preLetter.setText(letters.getLast());
         } else {
             preLetter.setText(letters.get(namePointer-1));
         }
@@ -226,18 +240,13 @@ public class GUI implements KeyListener {
     private static HashMap<String, Integer> sortByValue(HashMap<String, Integer> hm) {
         // Create a list from elements of HashMap
         List<Map.Entry<String, Integer>> list =
-                new LinkedList<Map.Entry<String, Integer> >(hm.entrySet());
+                new LinkedList<>(hm.entrySet());
 
         // Sort the list
-        Collections.sort(list, new Comparator<Map.Entry<String, Integer> >() {
-            public int compare(Map.Entry<String, Integer> o1,
-                               Map.Entry<String, Integer> o2) {
-                return (o1.getValue()).compareTo(o2.getValue());
-            }
-        });
+        list.sort(Map.Entry.comparingByValue());
 
         // put data from sorted list to hashmap
-        HashMap<String, Integer> temp = new LinkedHashMap<String, Integer>();
+        HashMap<String, Integer> temp = new LinkedHashMap<>();
         for (Map.Entry<String, Integer> aa : list.reversed()) {
             temp.put(aa.getKey(), aa.getValue());
         }
@@ -248,50 +257,53 @@ public class GUI implements KeyListener {
         if (gameOn) {
             gameBoard.moveSpaceShip(mode);
         } else if (writeName) {
-            switch (mode) {
-                case 4:
-                    updateNamePanel(-1);
-                    break;
-                case 8:
-                    updateNamePanel(1);
-                    break;
-                case 1:
-                    switch (letters.getFirst()) {
-                        case "A" -> {
-                            letters = lowerCase;
-                            updateNamePanel(0);
+            if (keyboardControl || !timer.isRunning()) {
+                timer.start();
+                switch (mode) {
+                    case 4:
+                        updateNamePanel(-1);
+                        break;
+                    case 8:
+                        updateNamePanel(1);
+                        break;
+                    case 1:
+                        switch (letters.getFirst()) {
+                            case "A" -> {
+                                letters = lowerCase;
+                                updateNamePanel(0);
+                            }
+                            case "a" -> {
+                                letters = numbers;
+                                updateNamePanel(0);
+                            }
+                            case "0" -> {
+                                letters = upperCase;
+                                updateNamePanel(0);
+                            }
                         }
-                        case "a" -> {
-                            letters = numbers;
-                            updateNamePanel(0);
+                        break;
+                    case 2:
+                        switch (letters.getFirst()) {
+                            case "A" -> {
+                                letters = numbers;
+                                updateNamePanel(0);
+                            }
+                            case "a" -> {
+                                letters = upperCase;
+                                updateNamePanel(0);
+                            }
+                            case "0" -> {
+                                letters = lowerCase;
+                                updateNamePanel(0);
+                            }
                         }
-                        case "0" -> {
-                            letters = upperCase;
-                            updateNamePanel(0);
-                        }
-                    }
-                    break;
-                case 2:
-                    switch (letters.getFirst()) {
-                        case "A" -> {
-                            letters = numbers;
-                            updateNamePanel(0);
-                        }
-                        case "a" -> {
-                            letters = upperCase;
-                            updateNamePanel(0);
-                        }
-                        case "0" -> {
-                            letters = lowerCase;
-                            updateNamePanel(0);
-                        }
-                    }
-                    break;
-                case 16:
-                    updatePlayerName();
-                    break;
-                default:
-                    break;
+                        break;
+                    case 16:
+                        updatePlayerName();
+                        break;
+                    default:
+                        break;
+                }
             }
         } else {
             if (mode == 42) {
@@ -304,7 +316,8 @@ public class GUI implements KeyListener {
                 mainFrame.addKeyListener(this);
                 keyboardControl = true;
             }
-            if (mode == 16) {
+            if (mode == 16 && !timer.isRunning()) {
+                timer.start();
                 headerLabel.setText("");
                 scoreLabel.setText("Score: 0");
                 gameOn = true;
