@@ -28,9 +28,9 @@ public class Board extends JPanel implements ActionListener {
     private boolean missileFired;
     private ArrayList<Monster> monsters;
     private int numberOfMonsters;
-    private final GUI myGUI;
+    private final Game myGUI;
 
-    public Board(GUI gui) {
+    public Board(Game gui) {
         setBackground(Color.black);
         setFocusable(true);
         setSize(WIDTH, HEIGHT);
@@ -123,7 +123,7 @@ public class Board extends JPanel implements ActionListener {
     }
 
     private void step() {
-        myGUI.updateGUI(0);
+        myGUI.update(0);
         repaint(spaceShip.getX()-30, spaceShip.getY()-30,
                 spaceShip.getWidth()+50, spaceShip.getHeight()+50);
     }
@@ -177,7 +177,7 @@ public class Board extends JPanel implements ActionListener {
         timer.stop();
         barTick = 0;
         bar = null;
-        myGUI.updateGUI(-1);
+        myGUI.update(-1);
     }
 
     private void moveMonster() {

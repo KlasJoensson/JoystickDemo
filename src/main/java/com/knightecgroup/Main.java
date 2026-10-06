@@ -7,7 +7,7 @@ public class Main {
 
     private final static double SCAN_TIMEOUT_SECONDS = 5.0;
     private static boolean keyboardControl = false;
-    private final static GUI myGUI = new GUI();
+    private final static Game myGame = Game.initGame();
     private final static Logger log = Logger.getLogger(Main.class.getName());
 
     // We know the input is a '32-bit' integer encode as an 8 char string, with the bytes in reverse order
@@ -60,10 +60,9 @@ public class Main {
             }
         }
 
-        myGUI.createWindow();
         if (keyboardControl) {
             log.info("Uses the keyboard as input...");
-            myGUI.controlGame(21);
+            myGame.controlGame(21);
         } else {
             log.info("Connecting to BLE device " + address + " ...");
             try {
@@ -71,10 +70,10 @@ public class Main {
                     if (line.startsWith("NOTIFY ")) {
                         String[] parts = line.split(" ", 3);
                         int res = convertToInteger(parts[2]);
-                        myGUI.controlGame(res);
+                        myGame.controlGame(res);
                         interpretResponse(res);
                     } else if (line.startsWith("DISCONNECTED")) {
-                        myGUI.disconnected();
+                        myGame.disconnected();
                         log.info("[ble] " + line);
                     } else {
                         log.info("[ble] " + line);

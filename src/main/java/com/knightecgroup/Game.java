@@ -11,7 +11,7 @@ import java.io.*;
 import java.util.*;
 import java.util.List;
 
-public class GUI implements KeyListener {
+public class Game implements KeyListener {
     private JFrame mainFrame;
     private JLabel headerLabel;
     private JLabel playerNameLabel;
@@ -33,7 +33,20 @@ public class GUI implements KeyListener {
     private ArrayList<String> upperCase;
     private ArrayList<String> numbers;
     private final String storedHighScore = "src/main/resources/highscores.txt";
+    private static Game thisGame;
 
+    public static Game initGame() {
+        if (thisGame == null) {
+            thisGame = new Game();
+        }
+        return thisGame;
+    }
+
+    private Game() {
+        createWindow();
+    }
+
+    // Move to GUI
     public void createWindow() {
         mainFrame = new JFrame("Joystick demo");
         mainFrame.setSize(1000,800);
@@ -57,6 +70,7 @@ public class GUI implements KeyListener {
         mainFrame.setVisible(true);
     }
 
+    // Keep
     private final ActionListener stopTimer = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -64,6 +78,7 @@ public class GUI implements KeyListener {
         }
     };
 
+    // Move to GUI
     private JPanel createLeaderBoard() {
         JPanel board = new JPanel();
         board.setLayout(new GridLayout(3, 1));
@@ -85,6 +100,7 @@ public class GUI implements KeyListener {
         return board;
     }
 
+    // Move to GUI
     private JPanel getTableWrapper() {
         JPanel tablePanel = new JPanel(new GridLayout(highScores.size(), 2));
         for (Map.Entry<String, Integer> entry : highScores.entrySet()) {
@@ -101,6 +117,7 @@ public class GUI implements KeyListener {
         return tableWrapper;
     }
 
+    // Keep
     private HashMap<String, Integer> initHighScores() {
         HashMap <String, Integer> highScores = new HashMap<>();
         File file = new File(storedHighScore);
@@ -136,11 +153,17 @@ public class GUI implements KeyListener {
         for (int i = 0; i < 10; i++) { numbers.add(String.valueOf(i)); }
         numbers.add("End");
 
-        letters = upperCase;
+        setLetters(upperCase);
 
         return highScores;
     }
 
+    // Move to GUI
+    public void setLetters(ArrayList<String> letters) {
+        this.letters = letters;
+    }
+
+    // Move to GUI
     private void startGame() {
         mainFrame.remove(scorePanel);
         if (gameBoard == null) {
@@ -153,43 +176,62 @@ public class GUI implements KeyListener {
         mainFrame.setVisible(true);
     }
 
+    // Keep
     public void disconnected() {
         gameOn = false;
-        headerLabel.setText("Disconnected...");
+        updateHeaderText("Disconnected...");
     }
 
-    public void updateGUI(int gameStatus){
+    // Move to GUI
+    public void updateHeaderText(String text) {
+        headerLabel.setText(text);
+    }
+
+    // Keep
+    public void update(int gameStatus){
         if (gameStatus == 0) {
             gameOn = true;
-            scoreLabel.setText("Score: " + gameBoard.getScore());
+            updateScoreLabel(gameBoard.getScore());
         } else if (gameStatus == -1) {
             gameOn = false;
-            mainFrame.remove(gameBoard);
-            headerLabel.setText("GAME OVER!!!");
-            namePanel = createNamePanel();
+            gameOver();
             int minHighScore = highScores.values().stream().min(Comparator.naturalOrder()).orElse(0);
             if (minHighScore < gameBoard.getScore()) {
                 writeName = true;
-                highScores = sortByValue(highScores);
-                highScores.remove(highScores.entrySet().stream().toList().getLast().getKey());
-                mainFrame.add(namePanel);
-                mainFrame.repaint();
+                writeNewName();
             } else {
-                if (!writeName) {
-                    headerLabel.setText("GAME OVER!!! Press fire to start...");
-                    scorePanel = createLeaderBoard();
-                    mainFrame.remove(namePanel);
-                    mainFrame.add(scorePanel);
-                }
+                showLeaderBoard();
             }
         } else if (gameStatus == 1) {
-            headerLabel.setText("GAME OVER!!! Press fire to start...");
-            scorePanel = createLeaderBoard();
-            mainFrame.remove(namePanel);
-            mainFrame.add(scorePanel);
+            showLeaderBoard();
         }
     }
 
+    // move to GUI
+    public void gameOver() {
+        mainFrame.remove(gameBoard);
+        headerLabel.setText("GAME OVER!!!");
+    }
+
+    // Move to GUI
+    public void updateScoreLabel(int score) {
+        scoreLabel.setText("Score: " + score);
+    }
+    // Move to GUI
+    public void writeNewName() {
+        namePanel = createNamePanel();
+        mainFrame.add(namePanel);
+        mainFrame.repaint();
+    }
+    // Move to GUI
+    public void showLeaderBoard() {
+        headerLabel.setText("GAME OVER!!! Press fire to start...");
+        scorePanel = createLeaderBoard();
+        mainFrame.remove(namePanel);
+        mainFrame.add(scorePanel);
+    }
+
+    // Move to GUI
     private JPanel createNamePanel() {
         JPanel namePanel = new JPanel();
         namePanel.setLayout(new BoxLayout(namePanel, BoxLayout.Y_AXIS));
@@ -221,6 +263,7 @@ public class GUI implements KeyListener {
         return namePanel;
     }
 
+    // Move to GUI
     private void updateNamePanel(int move) {
         namePointer += move;
         if (namePointer >= letters.size()) {
@@ -245,12 +288,10 @@ public class GUI implements KeyListener {
         }
     }
 
+    // Move to GUI
     private void updatePlayerName() {
         if (letters.get(namePointer).strip().equals("End")) {
-            writeName = false;
-            highScores.put(playerNameLabel.getText().strip(), gameBoard.getScore());
-            updateHighScoreFile();
-            updateGUI(1);
+            addNewPlayer(playerNameLabel.getText().strip(), gameBoard.getScore());
         } else {
             String name = playerNameLabel.getText();
             name += letters.get(namePointer).strip();
@@ -258,6 +299,16 @@ public class GUI implements KeyListener {
         }
     }
 
+    // Keep
+    public void addNewPlayer(String name, int score) {
+        highScores = sortByValue(highScores);
+        highScores.remove(highScores.entrySet().stream().toList().getLast().getKey());
+        highScores.put(name, score);
+        updateHighScoreFile();
+        update(1);
+    }
+
+    // Keep
     private void updateHighScoreFile() {
         try (FileWriter newHighScores = new FileWriter(storedHighScore)) {
             for (Map.Entry<String, Integer> entry : highScores.entrySet()) {
@@ -269,6 +320,7 @@ public class GUI implements KeyListener {
         }
     }
 
+    // Keep
     private static HashMap<String, Integer> sortByValue(HashMap<String, Integer> hm) {
         // Create a list from elements of HashMap
         List<Map.Entry<String, Integer>> list =
@@ -285,9 +337,10 @@ public class GUI implements KeyListener {
         return temp;
     }
 
+    // Keep
     public void controlGame(int mode) {
         if (gameOn) {
-            gameBoard.moveSpaceShip(mode);
+            controlSpaceship(mode);
         } else if (writeName) {
             if (keyboardControl || !timer.isRunning()) {
                 timer.start();
@@ -299,38 +352,39 @@ public class GUI implements KeyListener {
                         updateNamePanel(1);
                         break;
                     case 1:
-                        switch (letters.getFirst()) {
+                        switch (getFirstLetter()) {
                             case "A" -> {
-                                letters = lowerCase;
+                                setLetters(lowerCase);
                                 updateNamePanel(0);
                             }
                             case "a" -> {
-                                letters = numbers;
+                                setLetters(numbers);
                                 updateNamePanel(0);
                             }
                             case "0" -> {
-                                letters = upperCase;
+                                setLetters(upperCase);
                                 updateNamePanel(0);
                             }
                         }
                         break;
                     case 2:
-                        switch (letters.getFirst()) {
+                        switch (getFirstLetter()) {
                             case "A" -> {
-                                letters = numbers;
+                                setLetters(numbers);
                                 updateNamePanel(0);
                             }
                             case "a" -> {
-                                letters = upperCase;
+                                setLetters(upperCase);
                                 updateNamePanel(0);
                             }
                             case "0" -> {
-                                letters = lowerCase;
+                                setLetters(lowerCase);
                                 updateNamePanel(0);
                             }
                         }
                         break;
                     case 16:
+                        writeName = false;
                         updatePlayerName();
                         break;
                     default:
@@ -339,30 +393,46 @@ public class GUI implements KeyListener {
             }
         } else {
             if (mode == 42) {
-                headerLabel.setText("Ready! Press fire to start...");
-                scoreLabel.setText("Score: 0");
+                updateHeaderText("Ready! Press fire to start...");
+                updateScoreLabel(0);
             }
             if (mode == 21) {
-                headerLabel.setText("Ready! Press space to start...");
-                scoreLabel.setText("Score: 0");
-                mainFrame.addKeyListener(this);
+                updateHeaderText("Ready! Press space to start...");
+                updateScoreLabel(0);
+                addKeyListener(this);
                 keyboardControl = true;
             }
             if (mode == 16 && !timer.isRunning()) {
                 timer.start();
-                headerLabel.setText("");
-                scoreLabel.setText("Score: 0");
+                updateHeaderText("");
+                updateScoreLabel(0);
                 gameOn = true;
                 startGame();
             }
         }
-
     }
+
+    // Move to GUI
+    public void controlSpaceship(int mode) {
+        gameBoard.moveSpaceShip(mode);
+    }
+
+    // Move to GUI
+    public void addKeyListener(KeyListener kl) {
+        mainFrame.addKeyListener(kl);
+    }
+
+    // Moive to GUI
+    public String getFirstLetter() {
+        return letters.getFirst();
+    }
+
+    // Keep
     @Override
     public void keyTyped(KeyEvent e) {
 
     }
-
+    // Keep
     @Override
     public void keyPressed(KeyEvent e) {
         if (keyboardControl) {
@@ -393,7 +463,7 @@ public class GUI implements KeyListener {
             }
         }
     }
-
+    // Keep
     @Override
     public void keyReleased(KeyEvent e) {
 
