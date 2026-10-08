@@ -90,14 +90,17 @@ public class Game implements KeyListener {
     private void initLetterArrays() {
         upperCase = new ArrayList<>();
         for (char l = 'A'; l <= 'Z'; l++) { upperCase.add(String.valueOf(l)); }
+        upperCase.add("<-");
         upperCase.add("End");
 
         lowerCase = new ArrayList<>();
         for (char l = 'a'; l <= 'z'; l++) { lowerCase.add(String.valueOf(l)); }
+        lowerCase.add("<-");
         lowerCase.add("End");
 
         numbers = new ArrayList<>();
         for (int i = 0; i < 10; i++) { numbers.add(String.valueOf(i)); }
+        numbers.add("<-");
         numbers.add("End");
 
         myGUI.setLetters(upperCase);

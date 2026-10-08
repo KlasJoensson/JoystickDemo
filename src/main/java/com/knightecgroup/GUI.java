@@ -172,6 +172,11 @@ public class GUI {
         if (letters.get(namePointer).strip().equals("End")) {
             mygame.addNewPlayer(playerNameLabel.getText().strip(), gameBoard.getScore());
             return 0;
+        } else if (letters.get(namePointer).strip().equals("<-")) {
+            String name = playerNameLabel.getText();
+            name = name.substring(0, name.length() - 1);
+            playerNameLabel.setText(name);
+            return 1;
         } else {
             String name = playerNameLabel.getText();
             name += letters.get(namePointer).strip();
