@@ -64,6 +64,7 @@ public class Main {
             log.info("Uses the keyboard as input...");
             myGame.controlGame(21);
         } else {
+            myGame.controlGame(22);
             log.info("Connecting to BLE device " + address + " ...");
             try {
                 bridge.listen(address, line -> {

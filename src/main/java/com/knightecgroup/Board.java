@@ -28,13 +28,13 @@ public class Board extends JPanel implements ActionListener {
     private boolean missileFired;
     private ArrayList<Monster> monsters;
     private int numberOfMonsters;
-    private final Game myGUI;
+    private final Game myGame;
 
-    public Board(Game gui) {
+    public Board(Game game) {
         setBackground(Color.black);
         setFocusable(true);
         setSize(WIDTH, HEIGHT);
-        myGUI = gui;
+        myGame = game;
 
         initBoard();
     }
@@ -81,7 +81,7 @@ public class Board extends JPanel implements ActionListener {
            drawMonster();
         }
 
-        if (missileFired) {
+        if (missile != null && missileFired) {
             g2d.drawImage(missile.getImage(), missile.getX(), missile.getY(), this);
         }
     }
@@ -123,7 +123,7 @@ public class Board extends JPanel implements ActionListener {
     }
 
     private void step() {
-        myGUI.update(0);
+        myGame.update(0, score);
         repaint(spaceShip.getX()-30, spaceShip.getY()-30,
                 spaceShip.getWidth()+50, spaceShip.getHeight()+50);
     }
@@ -177,7 +177,7 @@ public class Board extends JPanel implements ActionListener {
         timer.stop();
         barTick = 0;
         bar = null;
-        myGUI.update(-1);
+        myGame.update(-1, score);
     }
 
     private void moveMonster() {
