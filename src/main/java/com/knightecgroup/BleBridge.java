@@ -15,15 +15,21 @@ public class BleBridge {
 
     private final String pythonExecutable;
     private final String scriptPath;
+    private final ProcessLauncher processLauncher;
 
     public BleBridge(String pythonExecutable, String scriptPath) {
+        this(pythonExecutable, scriptPath, command -> new ProcessBuilder(command).start());
+    }
+
+    BleBridge(String pythonExecutable, String scriptPath, ProcessLauncher processLauncher) {
         this.pythonExecutable = pythonExecutable;
         this.scriptPath = scriptPath;
+        this.processLauncher = processLauncher;
     }
 
     public List<BleDevice> scan(double timeoutSeconds) throws IOException, InterruptedException {
-        Process process = new ProcessBuilder(pythonExecutable, scriptPath, "scan",
-                String.valueOf(timeoutSeconds)).start();
+        Process process = processLauncher.launch(List.of(pythonExecutable, scriptPath, "scan",
+                String.valueOf(timeoutSeconds)));
 
         Thread errorReader = createErrorReader(process);
         errorReader.start();
@@ -65,7 +71,7 @@ public class BleBridge {
     }
 
     public void listen(String deviceAddress, Consumer<String> onLine) throws IOException, InterruptedException {
-        Process process = new ProcessBuilder(pythonExecutable, scriptPath, deviceAddress).start();
+        Process process = processLauncher.launch(List.of(pythonExecutable, scriptPath, deviceAddress));
 
         Thread errorReader = createErrorReader(process);
         errorReader.start();
