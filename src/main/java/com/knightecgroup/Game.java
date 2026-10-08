@@ -10,8 +10,12 @@ import java.awt.event.KeyListener;
 import java.io.*;
 import java.util.*;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class Game implements KeyListener {
+
+    private final Logger log = Logger.getLogger(Game.class.getName());
+
     private boolean gameOn = false;
     private boolean keyboardControl = false;
     private boolean writeName = false;
@@ -23,6 +27,9 @@ public class Game implements KeyListener {
     private final String storedHighScore = "src/main/resources/highscores.txt";
     private static Game thisGame;
     private static GUI myGUI;
+
+
+    /* Init and creation methods for the game */
 
     public static Game initGame() {
         myGUI = GUI.initGUI();
@@ -49,6 +56,8 @@ public class Game implements KeyListener {
         initLetterArrays();
     }
 
+    /* Helper methods used to init the game */
+
     private HashMap<String, Integer> initHighScores() {
         HashMap <String, Integer> highScores = new HashMap<>();
         File file = new File(storedHighScore);
@@ -59,16 +68,19 @@ public class Game implements KeyListener {
                     String[] parts = line.split(",");
                     highScores.put(parts[0], Integer.parseInt(parts[1]));
                 }
+                log.info("High scores loaded from file");
             } catch (IOException e) {
-                System.err.println("Error reading high scores.txt file: " + e.getMessage());
+                log.severe("Error reading high scores.txt file: " + e.getMessage());
             }
         } else {
             try {
                 if (!file.createNewFile()) {
-                    System.err.println("Error creating high scores.txt: File already exists...");
+                    log.severe("Error creating high scores.txt: File already exists...");
+                } else {
+                    log.info("High scores file has been created.");
                 }
             } catch (IOException e) {
-                System.err.println("Error creating high scores.txt file: " + e.getMessage());
+                log.severe("Error creating high scores.txt file: " + e.getMessage());
             }
         }
 
@@ -91,9 +103,13 @@ public class Game implements KeyListener {
         myGUI.setLetters(upperCase);
     }
 
+
+    /* Methods for controlling the game */
+
     public void disconnected() {
         gameOn = false;
         myGUI.updateHeaderText("Disconnected...");
+        log.severe("Got disconnected for Bluetooth device");
     }
 
     public void update(int gameStatus, int score){
@@ -121,6 +137,7 @@ public class Game implements KeyListener {
     }
 
     public void addNewPlayer(String name, int score) {
+        log.info("Adding player " + name + " with score " + score);
         highScores = sortByValue(highScores);
         highScores.remove(highScores.entrySet().stream().toList().getLast().getKey());
         highScores.put(name, score);
@@ -133,23 +150,23 @@ public class Game implements KeyListener {
                 newHighScores.write(entry.getKey() + "," + entry.getValue().toString() + "\n");
                 newHighScores.flush();
             }
+            log.info("High scores file has been updated.");
         } catch (IOException e) {
-            System.err.println("Can't write to file: " + e.getMessage());
+            log.severe("Can't write to file: " + e.getMessage());
         }
     }
+
     private static HashMap<String, Integer> sortByValue(HashMap<String, Integer> hm) {
-        // Create a list from elements of HashMap
         List<Map.Entry<String, Integer>> list =
                 new LinkedList<>(hm.entrySet());
 
-        // Sort the list
         list.sort(Map.Entry.comparingByValue());
 
-        // put data from sorted list to hashmap
         HashMap<String, Integer> temp = new LinkedHashMap<>();
         for (Map.Entry<String, Integer> aa : list.reversed()) {
             temp.put(aa.getKey(), aa.getValue());
         }
+
         return temp;
     }
 
@@ -231,6 +248,9 @@ public class Game implements KeyListener {
             }
         }
     }
+
+
+    /* Methods for controlling the game with the keyboard */
 
     @Override
     public void keyTyped(KeyEvent e) {

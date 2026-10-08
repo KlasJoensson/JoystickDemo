@@ -6,8 +6,11 @@ import java.awt.event.KeyListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 public class GUI {
+
+    private final Logger log = Logger.getLogger(GUI.class.getName());
 
     private static GUI me;
 
@@ -57,6 +60,7 @@ public class GUI {
 
         mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         mainFrame.setVisible(true);
+        log.info("Main window created and showed");
     }
 
     private JPanel createLeaderBoard(HashMap<String, Integer> highScores) {
@@ -70,6 +74,8 @@ public class GUI {
         JPanel tableWrapper = getTableWrapper(highScores);
         board.add(tableWrapper);
         board.add(new JLabel(" ", JLabel.CENTER));
+
+        log.info("New high score board created");
 
         return board;
     }
@@ -118,6 +124,8 @@ public class GUI {
         updateNamePanel(0);
 
         namePanel.add(letterPanel);
+
+        log.info("New name panel created");
 
         return namePanel;
     }
@@ -198,8 +206,6 @@ public class GUI {
         mainFrame.repaint();
     }
 
-
-
     public void gameOver() {
         mainFrame.remove(gameBoard);
         headerLabel.setText("GAME OVER!!!");
@@ -229,8 +235,8 @@ public class GUI {
         mainFrame.add(gameBoard);
         mainFrame.repaint();
         mainFrame.setVisible(true);
+
+        log.info("Game on");
     }
-
-
 
 }
